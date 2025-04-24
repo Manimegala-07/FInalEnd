@@ -1,0 +1,65 @@
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+
+function App() {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [notes, setNotes] = useState([]);
+
+  // Fetch all notes on page load
+  useEffect(() => {
+    fetchNotes();
+  }, []);
+
+  const fetchNotes = async () => {
+    const res = await axios.get("http://localhost:5000/api/notes");
+    setNotes(res.data);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await axios.post("http://localhost:5000/api/notes", { title, description });
+    setTitle('');
+    setDescription('');
+    fetchNotes(); // refresh list after adding
+  };
+
+  return (
+    <div style={{ padding: "2rem" }}>
+      <h1>📝 Todo List</h1>
+      
+      <form onSubmit={handleSubmit} style={{ marginBottom: "1rem" }}>
+        <input
+          type='text'
+          value={title}
+          placeholder='Enter title'
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
+        <input
+          type='text'
+          value={description}
+          placeholder='Enter description'
+          onChange={(e) => setDescription(e.target.value)}
+          required
+        />
+        <button type='submit'>Submit</button>
+      </form>
+
+      <h2>📋 Notes:</h2>
+      {notes.length === 0 ? (
+        <p>No notes yet!</p>
+      ) : (
+        <ul>
+          {notes.map((note) => (
+            <li key={note._id}>
+              <strong>{note.title}</strong>: {note.description}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+export default App;
